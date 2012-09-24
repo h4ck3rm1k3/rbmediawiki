@@ -282,7 +282,7 @@ class Page
         }
         return ims
     end
-    #gets templates used in a page
+    #gets categories used in a page
     #min is the minimum number of elements to return, cllimit is the number of
     #elements to request from the API in each iteration. The method will 
     #request elements until it has at least min elements.

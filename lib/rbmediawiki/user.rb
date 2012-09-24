@@ -69,24 +69,27 @@ class User
 
     #get user contributions
     #returns false if there aren't any
-    def get_usercontribs(uclimit = 500, ucstart = nil, ucnamespace = nil)
+    def get_usercontribs(uclimit = 500, ucstart = nil, ucnamespace = nil, ucdir="newer")
         uccontinue = nil
-        ucs = Hash.new
-        puts ucstart
+        ucs = Array.new
         loop {
-            result = @site.query_list_usercontribs(nil, uclimit, ucstart, nil, uccontinue, @username, nil, "newer", ucnamespace)
-            ucs.deep_merge!(result['query'])
+            result = @site.query_list_usercontribs(nil, uclimit, ucstart, nil, uccontinue, @username, nil, ucdir, ucnamespace)
+            if !result['query']['usercontribs'].has_key?('item')
+                raise NoUser
+            end
+            items = result['query']['usercontribs']['item']
+            if items.is_a? Array
+                ucs = ucs + items
+            else
+                ucs.push(items)
+            end
             if result.key?('query-continue')
                 ucstart = result['query-continue']['usercontribs']['ucstart']
             else
                 break
             end
         }
-        if ucs['usercontribs'].key?('item')
-            return ucs['usercontribs']['item']
-        else 
-            return false
-        end
+        return ucs
     end
 
     #rollbacks (reverts) all edits by the user since a given time.
@@ -108,4 +111,8 @@ class User
             end
         }
     end
+end
+
+
+class NoUser < RuntimeError
 end
